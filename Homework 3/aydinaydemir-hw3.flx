@@ -1,0 +1,57 @@
+%{
+#include <string.h>
+#include "aydinaydemir-hw3.tab.h"
+#include "hw3.h"
+
+int lineNumber = 1;
+%}
+%%
+
+
+['][^']*[']		{
+    char *newline_pos = yytext;
+    while ((newline_pos = strchr(newline_pos, '\n')) != NULL) {
+        newline_pos++;
+        lineNumber++;
+    } 
+    
+    yytext[yyleng-1]='\0';
+    yylval.strNode.text = strdup(yytext+1);
+    return tSTRING;
+    }
+"\n" lineNumber++;
+
+
+["]Get["]		return tGET;
+["]Set["]		return tSET;
+["]Function["]		return tFUNCTION;
+["]Print["]		return tPRINT;
+["]If["]		return tIF;
+["]Return["]		return tRETURN;
+
+["]"+"["]       {yylval.lineNum = lineNumber;        return tADD;}
+["]"-"["]       {yylval.lineNum = lineNumber;        return tSUB;}
+["]"*"["]       {yylval.lineNum = lineNumber;        return tMUL;}
+["]"/"["]       {yylval.lineNum = lineNumber;        return tDIV;}
+["]"++"["]		return tINC;
+["]">"["]		return tGT;
+["]"=="["]		return tEQUALITY;
+["]"--"["]		return tDEC;
+["]"<"["]		return tLT;
+["]"<="["]		return tLEQ;
+["]">="["]		return tGEQ;
+
+
+["][_a-zA-Z][a-zA-Z0-9_]*["]	return tIDENT;
+				
+[0-9]+ {yylval.numNode.value = atoi (yytext); yylval.numNode.isDouble = 0; return tNUM;  }   
+-[0-9]+ {yylval.numNode.value = atoi (yytext); yylval.numNode.isDouble = 0; return tNUM;  } 		
+[0-9]+"."[0-9]+	{yylval.numNode.value = atof (yytext); yylval.numNode.isDouble = 1;  return tNUM;  }
+-[0-9]+"."[0-9]+	 {yylval.numNode.value = atof (yytext); yylval.numNode.isDouble = 1; ; return tNUM;  }
+
+
+	
+[ \t\r]+ 
+.			return yytext[0];
+
+%%
